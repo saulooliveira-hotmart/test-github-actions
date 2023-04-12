@@ -1,0 +1,46 @@
+name: Monorepo Pipeline
+
+on:
+  push:
+    paths:
+      - '**/Dockerfile'
+  pull_request:
+    paths:
+      - '**/Dockerfile'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build Docker image for subdiretorio1
+        uses: docker/build-push-action@v2
+        with:
+          context: ./subdiretorio1
+          push: false
+          tags: subdiretorio1:latest
+
+      - name: Build Docker image for subdiretorio2
+        uses: docker/build-push-action@v2
+        with:
+          context: ./subdiretorio2
+          push: false
+          tags: subdiretorio2:latest
+
+      # Adicione mais etapas aqui para cada subdiretório
+
+      - name: Push Docker images to container registry
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ${{ github.repository }}:${{ github.sha }}
+          build-args: |
+            SUBDIRETORIO1_IMAGE=subdiretorio1:latest
+            SUBDIRETORIO2_IMAGE=subdiretorio2:latest
+          registry: docker.pkg.github.com
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
