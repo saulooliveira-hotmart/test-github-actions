@@ -2,11 +2,11 @@ name: Monorepo Pipeline
 
 on:
   push:
-    paths:
-      - '**/Dockerfile'
+    branches:
+      - main
   pull_request:
-    paths:
-      - '**/Dockerfile'
+    branches:
+      - main
 
 jobs:
   build:
@@ -15,32 +15,45 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build Docker image for subdiretorio1
-        uses: docker/build-push-action@v2
-        with:
-          context: ./subdiretorio1
-          push: false
-          tags: subdiretorio1:latest
+      - name: Check if subdiretorio1 has changed
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -q subdiretorio1/; then
+            echo "Changes detected in subdiretorio1"
+          else
+            echo "No changes detected in subdiretorio1, skipping pipeline"
+            exit 0
+          fi
 
-      - name: Build Docker image for subdiretorio2
-        uses: docker/build-push-action@v2
-        with:
-          context: ./subdiretorio2
-          push: false
-          tags: subdiretorio2:latest
+      - name: Install dependencies and build subdiretorio1
+        run: |
+          cd subdiretorio1
+          npm ci
+          npm run build
+
+      - name: Check if subdiretorio2 has changed
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -q subdiretorio2/; then
+            echo "Changes detected in subdiretorio2"
+          else
+            echo "No changes detected in subdiretorio2, skipping pipeline"
+            exit 0
+          fi
+
+      - name: Install dependencies and build subdiretorio2
+        run: |
+          cd subdiretorio2
+          npm ci
+          npm run build
 
       # Adicione mais etapas aqui para cada subdiretório
 
-      - name: Push Docker images to container registry
-        uses: docker/build-push-action@v2
+      - name: Push changes to GitHub
+        uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          context: .
-          push: true
-          tags: ${{ github.repository }}:${{ github.sha }}
-          build-args: |
-            SUBDIRETORIO1_IMAGE=subdiretorio1:latest
-            SUBDIRETORIO2_IMAGE=subdiretorio2:latest
-          registry: docker.pkg.github.com
+          commit_message: "chore: Update subdiretorios"
+          commit_options: '--no-verify'
+          commit_user_email: saulo.oliveira@hotmart.com
+          commit_user_name: "Saulo Oliveira"
+          branches: ${{ github.ref }}
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
