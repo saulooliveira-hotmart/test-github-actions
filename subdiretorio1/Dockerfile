@@ -1,2 +1,4 @@
-RUN echo "hello there subdiretorio2"
-# mexida outra
+FROM alpine:3.7
+RUN echo "hello there subdiretorio1"
+
+
