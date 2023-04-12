@@ -45,8 +45,6 @@ jobs:
           npm ci
           npm run build
 
-      # Adicione mais etapas aqui para cada subdiretório
-
       - name: Push changes to GitHub
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
