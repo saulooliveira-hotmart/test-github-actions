@@ -1,0 +1,33 @@
+name: Deploy to Production
+on:
+  push:
+    branches:
+      - gh-pages # nome da branch para a qual você quer implantar sua aplicação
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          cd subdiretorio2
+          npm ci
+          npm run build
+#      - name: Build app
+#        run: npm run build # comando para construir sua aplicação
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@3.7.1 # usar um action existente para implantar no GitHub Pages
+        with:
+          branch: gh-pages # nome da branch para a qual você quer implantar sua aplicação no GitHub Pages
+          folder: ./subdiretorio1/build # diretório local onde sua aplicação foi construída
+
+#      - name: Deploy to production
+#        uses: easingthemes/ssh-deploy@v2.1.4 # usar um action existente para fazer o deploy via SSH
+#        env:
+#          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }} # variável de ambiente para armazenar a chave SSH privada
+#        with:
+#          server: seu_servidor.com # servidor de produção
+#          username: seu_usuario # usuário do servidor de produção
+#          remote_path: /var/www/seu_site # diretório remoto onde sua aplicação será implantada
+#          local_path: ./build # diretório local onde sua aplicação foi construída
