@@ -5,7 +5,9 @@ module.exports = {
   entry: './src/index.js', // arquivo de entrada da aplicação
   output: {
     path: path.resolve(__dirname, 'build'), // diretório de saída
-    filename: 'bundle.js' // arquivo de saída
+    filename: 'bundle.js', // arquivo de saída
+    library: 'MyLibrary', // nome da biblioteca
+    libraryTarget: 'umd' // define a forma como a biblioteca será disponibilizada
   },
   module: {
     rules: [
